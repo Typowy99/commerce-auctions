@@ -16,6 +16,13 @@ class AuctionListingForm(forms.ModelForm):
         if price < 0:
             raise forms.ValidationError("Price cannot be negative.")
         return price
+    
+
+class BidForm(forms.ModelForm):
+    class Meta:
+        model = Bid
+        fields = ['price']
+
 
 def index(request):
     auctions = AuctionListing.objects.all()
@@ -23,11 +30,26 @@ def index(request):
         "auctions": auctions
     })
 
+
 def auction(request, auction_id):
     auction = AuctionListing.objects.get(id=auction_id)
+    if request.method == "POST":
+        form = BidForm(request.POST)
+        if form.is_valid():
+            bid = form.save(commit=False)
+            bid.user = request.user
+            bid.auction = auction
+            bid.save()
+            return redirect('auction', auction_id=auction_id)
+    else:
+        form = BidForm()
+    
     return render(request, "auctions/auction.html", {
-        "auction": auction
+        "auction": auction,
+        "form": form
     })
+
+
 def create_auction(request):
     if request.method == 'POST':
         form = AuctionListingForm(request.POST)
@@ -44,6 +66,7 @@ def create_auction(request):
     return render(request, "auctions/create_auction.html", {
         "form": form
     })
+
 
 def login_view(request):
     if request.method == "POST":

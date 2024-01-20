@@ -19,10 +19,14 @@ class AuctionListing(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    img_url = models.URLField()
+    img_url = models.URLField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+
+    @property
+    def bid_count(self):
+        return Bid.objects.filter(auction=self).count()
 
 
 class Bid(models.Model):
@@ -30,11 +34,6 @@ class Bid(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     auction = models.ForeignKey(AuctionListing, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def save_current_price(self, *args, **kwargs):
-        self.auction.current_price = self.price
-        self.auction.save()
-        super(Bid, self).save(*args, **kwargs)
 
 
 class Comment(models.Model):
