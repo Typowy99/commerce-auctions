@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -14,15 +15,31 @@ def index(request):
     })
 
 
+
 def auction(request, auction_id):
     auction = AuctionListing.objects.get(id=auction_id)
     if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect('login')
+        
         form = BidForm(request.POST)
+
         if form.is_valid():
+            bid_value = form.cleaned_data["price"]
+            if bid_value <= auction.current_price:
+                return render(request, "auctions/auction.html", {
+                    "auction": auction,
+                    "form": form,
+                    "message": f"The price must be greater than {auction.current_price}"
+                })
             bid = form.save(commit=False)
             bid.user = request.user
             bid.auction = auction
             bid.save()
+            
+            auction.current_price = bid_value
+            auction.save()
+
             return redirect('auction', auction_id=auction_id)
     else:
         form = BidForm()
@@ -33,6 +50,29 @@ def auction(request, auction_id):
     })
 
 
+@login_required(login_url='login')
+def watchlist(request, auction_id):
+    if request.method == "POST":
+        auction = AuctionListing.objects.get(id=auction_id)
+        user_watchlists = request.user.watchlist.all()
+
+        if auction in user_watchlists:
+            request.user.watchlist.remove(auction)
+        else:
+            request.user.watchlist.add(auction)
+
+    return redirect('auction', auction_id)
+
+
+@login_required(login_url='login')
+def watchlist_view(request):
+    watchlist = request.user.watchlist.all()
+    return render(request, "auctions/watchlist.html", {
+        "auctions": watchlist
+    })
+
+
+@login_required(login_url='login')
 def create_auction(request):
     if request.method == 'POST':
         form = AuctionListingForm(request.POST)

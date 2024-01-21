@@ -27,6 +27,15 @@
         <li class="nav-item">
             <a class="nav-link" href="{% url 'create_auction' %}">Create Listing</a>
         </li>
+        {% if user.watchlist_count > 0 %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'watchlist_view' %}">Watchlist ({{ user.watchlist_count }})</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'watchlist_view' %}">Watchlist</a>
+        </li>
+        {% endif %}
         <li class="nav-item">
             <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
         </li>

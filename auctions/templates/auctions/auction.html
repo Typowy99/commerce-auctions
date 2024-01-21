@@ -3,13 +3,19 @@
 {% block body %}
 <h1>Listing: {{ auction.title }}</h1>
 <img src="{{ auction.img_url }}" class="img-fluid" alt="{{ auction.title }}" style="height: 300px;">
-<button type="button" class="btn btn-secondary">Watchlist</button>
+<form action="{% url 'watchlist' auction.id %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-secondary">Watchlist</button>
+</form>
 {{auction.descripte}}
-<h2>{{ auction.price }}</h2>
+<h2>${{ auction.current_price }}</h2>
 <p>{{ auction.bid_count }} people are bidding</p>
 <form action="{% url 'auction' auction.id %}" method="post">
     {% csrf_token %}
     {{ form }}
+    {% if message %}
+    <p>{{message}}</p>
+    {% endif %}
     <button type="submit">Place Bid</button>
 </form>
 <h2>Details</h2>

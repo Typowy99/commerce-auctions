@@ -3,7 +3,11 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    watchlist = models.ManyToManyField('AuctionListing', blank=True)
+
+    @property
+    def watchlist_count(self):
+        return self.watchlist.count()
 
 
 class Category(models.Model):
@@ -27,6 +31,11 @@ class AuctionListing(models.Model):
     @property
     def bid_count(self):
         return Bid.objects.filter(auction=self).count()
+    
+    def save(self, *args, **kwargs):
+        if not self.current_price:
+            self.current_price = self.price
+        super(AuctionListing, self).save(*args, **kwargs)
 
 
 class Bid(models.Model):
