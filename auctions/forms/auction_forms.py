@@ -31,3 +31,7 @@ class BidForm(forms.ModelForm):
         if price <= self.auction.current_price:
             raise forms.ValidationError("The price must be greater than the current price.")
         return price
+
+
+class CommentForm(forms.Form):
+    text = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label=False)

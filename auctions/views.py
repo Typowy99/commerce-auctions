@@ -5,7 +5,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from .models import Bid, User, Category, AuctionListing, Comment
-from .forms.auction_forms import AuctionListingForm, BidForm
+from .forms.auction_forms import AuctionListingForm, BidForm, CommentForm
+
 
 def index(request):
     auctions = AuctionListing.objects.all()
@@ -14,9 +15,9 @@ def index(request):
     })
 
 
-
 def auction(request, auction_id):
     auction = AuctionListing.objects.get(id=auction_id)
+    comments = Comment.objects.filter(auction=auction)
 
     if request.method == "POST":
         if not request.user.is_authenticated:
@@ -39,13 +40,35 @@ def auction(request, auction_id):
     
     return render(request, "auctions/auction.html", {
         "auction": auction,
-        "form": form
+        "form": form,
+        "form_note": CommentForm(),
+        "comments": comments
     })
+
+
+def add_comment(request, auction_id):
+    auction = AuctionListing.objects.get(id=auction_id)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment_text = form.cleaned_data['text']
+            comment = Comment.objects.create(user=request.user, comment_text=comment_text, auction=auction)
+            auction.comments.add(comment)
+            auction.save()
+            # Tutaj możesz wykonać działania na wprowadzonej treści (np. zapis do bazy danych)
+            return redirect('auction', auction_id=auction_id)  # Przekierowanie na stronę po udanym dodaniu notatki
+    else:
+        form = CommentForm()
+
+    return render(request, 'add_note.html', {'form': form})
 
 
 @login_required(login_url='login')
 def watchlist(request, auction_id):
+
     if request.method == "POST":
+
         auction = AuctionListing.objects.get(id=auction_id)
         user_watchlists = request.user.watchlist.all()
 
@@ -67,8 +90,11 @@ def watchlist_view(request):
 
 @login_required(login_url='login')
 def create_auction(request):
+
     if request.method == 'POST':
+
         form = AuctionListingForm(request.POST)
+
         if form.is_valid():
             new_auction = form.save(commit=False)
             new_auction.owner_auction = request.user
