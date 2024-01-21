@@ -4,7 +4,6 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django import forms
 from .models import Bid, User, Category, AuctionListing, Comment
 from .forms.auction_forms import AuctionListingForm, BidForm
 
@@ -18,31 +17,25 @@ def index(request):
 
 def auction(request, auction_id):
     auction = AuctionListing.objects.get(id=auction_id)
+
     if request.method == "POST":
         if not request.user.is_authenticated:
             return redirect('login')
         
-        form = BidForm(request.POST)
+        form = BidForm(request.POST, auction=auction)
 
         if form.is_valid():
-            bid_value = form.cleaned_data["price"]
-            if bid_value <= auction.current_price:
-                return render(request, "auctions/auction.html", {
-                    "auction": auction,
-                    "form": form,
-                    "message": f"The price must be greater than {auction.current_price}"
-                })
             bid = form.save(commit=False)
             bid.user = request.user
             bid.auction = auction
             bid.save()
             
-            auction.current_price = bid_value
+            auction.current_price = bid.price
             auction.save()
 
             return redirect('auction', auction_id=auction_id)
     else:
-        form = BidForm()
+        form = BidForm(auction=auction)
     
     return render(request, "auctions/auction.html", {
         "auction": auction,
