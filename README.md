@@ -26,7 +26,7 @@ The application consists of four main models: User, AuctionListing, Bid, Categor
 ## Setup
 Requires Python3 and the package installer for Python (pip) to run:
 
-1. Install requirements (Django4): pip install -r requirements.txt
+1. Install requirements (Django5): pip install -r requirements.txt
 2. After cloning the repository, refer to the project folder and:
     - Create new migrations based on the changes in models: python3 manage.py makemigrations
     - Apply the migrations to the database: python3 manage.py migrate
