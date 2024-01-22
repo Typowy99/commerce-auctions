@@ -1,25 +1,22 @@
-{% extends "auctions/layout.html" %}
-
-{% block body %}
+{% extends "auctions/layout.html" %} {% block body %}
 <h2>Active Listings</h2>
 
 {% for auction in auctions %}
 <a href="{% url 'auction' auction.id %}">
-    <div class="card mb-3 w-100" style="height: 250px;">
-        <div class="row g-0">
-            <div class="col-md-4">
-                <img src="{{ auction.img_url }}" class="img-fluid rounded-start" alt="..." style="height: 250px;">
-            </div>
-            <div class="col-md-8">
-                <div class="card-body">
-                    <h5 class="card-title">{{ auction.title }}</h5>
-                    <p class="card-text">Price: ${{ auction.current_price }}</p>
-                    <p class="card-text"><small class="text-muted">Created: {{auction.created_at}}</small></p>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="card mb-3 w-100" style="height: 250px">
+		<div class="row g-0">
+			<div class="col-md-4">
+				<img src="{{ auction.img_url }}" class="img-fluid rounded-start" alt="..." style="height: 250px" />
+			</div>
+			<div class="col-md-8">
+				<div class="card-body">
+					<h5 class="card-title">{{ auction.title }}</h5>
+					<p class="card-text">Price: ${{ auction.current_price }}</p>
+					<p class="card-text"><small class="text-muted">Created: {{auction.created_at}}</small></p>
+				</div>
+			</div>
+		</div>
+	</div>
 </a>
 
-{% endfor %}
-{% endblock %}
+{% endfor %} {% endblock %}

@@ -29,13 +29,12 @@ def auction(request, auction_id):
     user_watchlist = False
     owner_auction = False
     if request.user.is_authenticated:
-        user_watchlist_auctions  = request.user.watchlist.all()
+        user_watchlist_auctions = request.user.watchlist.all()
         if auction in user_watchlist_auctions:
             user_watchlist = True
 
         if request.user == auction.owner_auction:
             owner_auction = True
-
 
     if request.method == "POST":
         if not request.user.is_authenticated:
@@ -100,9 +99,7 @@ def add_comment(request, auction_id):
 
 @login_required(login_url='login')
 def watchlist(request, auction_id):
-
     if request.method == "POST":
-
         auction = AuctionListing.objects.get(id=auction_id)
         user_watchlists = request.user.watchlist.all()
 
@@ -129,7 +126,6 @@ def watchlist_view(request):
 def create_auction(request):
     categories = Category.objects.all()
     if request.method == 'POST':
-
         form = AuctionListingForm(request.POST)
 
         if form.is_valid():
@@ -156,17 +152,14 @@ def close_auction(request, auction_id):
         auction.close_auction()
 
         return redirect('auction', auction_id)
-    
     else:
         return render(request, 'auctions/error.html', {
             "message": "You are not allowed to close this auction."
         })
 
 
-
 def login_view(request):
     if request.method == "POST":
-
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
@@ -214,3 +207,4 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
