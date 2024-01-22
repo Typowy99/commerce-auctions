@@ -27,15 +27,27 @@ class AuctionListing(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+    winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,  related_name='won_auctions')
+
 
     @property
     def bid_count(self):
         return Bid.objects.filter(auction=self).count()
     
+
     def save(self, *args, **kwargs):
         if not self.current_price:
             self.current_price = self.price
-        super(AuctionListing, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
+
+
+    def close_auction(self):
+        if self.is_active:
+            last_bid = Bid.objects.filter(auction=self).order_by('-created_at').first()
+            if last_bid:
+                self.winner = last_bid.user
+            self.is_active = False
+            self.save()
 
 
 class Bid(models.Model):
